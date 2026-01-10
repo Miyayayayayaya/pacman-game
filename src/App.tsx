@@ -29,10 +29,10 @@ function App() {
     <div className={styles.container}>
       <div className={styles.board}>
         {gameBoard.map((row,y)=>row.map((col,x)=>(
-          <div className={styles.cell} key={`${x}-${y}`}>
-          </div>
+          <div className={styles.cell} key={`${x}-${y}`}/>
         )))}
-        <div style={{gridColumn:pos.x,gridRow:pos.y,zIndex:10}}>
+        <div className={styles.character}
+        style={{left:(pos.x-1)*10,top:(pos.y-1)*10,zIndex:10}}>
           👤
         </div>
       </div>
