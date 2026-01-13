@@ -10,8 +10,8 @@
 .board{
   display: grid;
   margin:auto 0;
-  grid-template-columns: repeat(30,10px);
-  grid-template-rows:repeat(30,10px);
+  grid-template-columns: repeat(20,10px);
+  grid-template-rows:repeat(20,10px);
   width: 300px;
   height: 300px;
   position:relative;
