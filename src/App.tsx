@@ -4,17 +4,26 @@ import styles from './App.module.css';
 
 const makeGameBoard=(width:number,height:number):number[][]=>{
   const twoDimensionalArray:number[][]=Array.from({length:height},()=>Array.from({length:width},()=>0),);
-  twoDimensionalArray[5][5]=1
+  for (let kx=0; kx<width;kx++){
+    twoDimensionalArray[0][kx]=1;
+    twoDimensionalArray[height-1][kx]=1;
+  }
+  for(let ky=0;ky<height;ky++){
+    twoDimensionalArray[ky][0]=1;
+    twoDimensionalArray[ky][width-1]=1;
+  }
+  twoDimensionalArray[10][10]=2
   return twoDimensionalArray;
 }
 const setGameSize={
-  x:10,
-  y:10,
+  x:30,
+  y:30,
 }
 type Direction='UP'|'DOWN'|'RIGHT'|'LEFT'|'STOP';
 function App() {
   const [gameBoard, setGameBoard]=useState<number[][]>(makeGameBoard(setGameSize.y,setGameSize.x));
-  const [pos,setPos]=useState({x:0,y:0});
+  // [0]:通路 [1]:壁 [2]:アイテム
+  const [pos,setPos]=useState({x:1,y:1});
   const [dir,setDir]=useState<Direction>('STOP')
   // const [gameState, setGameState]=useState<GameState>({isGaming:true})
   // if(gameState.isGaming){
@@ -41,21 +50,54 @@ function App() {
         switch(dir){
           case 'UP':{
             const nextY=prev.y-1;
-            if (prev.y > 0 && gameBoard[nextY][prev.x]!==1) return {...prev,y:prev.y-1};
+            const nextX=prev.x;
+            if(gameBoard[nextY][nextX]===2){
+              setGameBoard((prevBoard)=>{
+                const newBoard=structuredClone(prevBoard);
+                newBoard[nextY][nextX]=0;
+                return newBoard
+              })
+            }
+            if (prev.y > 1 && gameBoard[nextY][prev.x]!==1) return {...prev,y:prev.y-1};
             break;
           }
           case 'DOWN':{
             const nextY=prev.y+1;
-            if (prev.y < setGameSize.y-1 && gameBoard[nextY][prev.x]!==1) return {...prev,y:prev.y+1};
+            const nextX=prev.x
+            if(gameBoard[nextY][nextX]===2){
+              setGameBoard((prevBoard)=>{
+                const newBoard=structuredClone(prevBoard);
+                newBoard[nextY][nextX]=0;
+                return newBoard
+              })
+            }
+            if (prev.y < setGameSize.y-2 && gameBoard[nextY][prev.x]!==1) return {...prev,y:prev.y+1};
+            
             break;
           }
           case 'LEFT':{
             const nextX=prev.x-1
+            const nextY=prev.y;
+            if(gameBoard[nextY][nextX]===2){
+              setGameBoard((prevBoard)=>{
+                const newBoard=structuredClone(prevBoard);
+                newBoard[nextY][nextX]=0;
+                return newBoard
+              })
+            }
             if (prev.x > 0 && gameBoard[prev.y][nextX]!==1) return {...prev,x:prev.x-1};
             break;
           }
           case 'RIGHT':{
             const nextX=prev.x+1;
+            const nextY=prev.y
+            if(gameBoard[nextY][nextX]===2){
+              setGameBoard((prevBoard)=>{
+                const newBoard=structuredClone(prevBoard);
+                newBoard[nextY][nextX]=0;
+                return newBoard
+              })
+            }
             if (prev.x < setGameSize.x-1 && gameBoard[prev.y][nextX]!==1) return {...prev,x:prev.x+1};
             break;
           }
@@ -73,7 +115,9 @@ function App() {
         gridTemplateColumns: `repeat(${setGameSize.x},10px)`,
         gridTemplateRows:`repeat(${setGameSize.y},10px)`}}>
         {gameBoard.map((row,y)=>row.map((col,x)=>(
-          <div className={styles.cell} key={`${x}-${y}`} style={{backgroundColor:col===1?'blue':'black'}}/>
+          <div className={styles.cell} key={`${x}-${y}`} style={{backgroundColor:col===1?'blue':'black'}}>
+            {col===2&&<div className={styles.dot}/>}
+          </div>
         )))}
         <div className={styles.character}
         style={{left:(pos.x)*10,top:(pos.y)*10,zIndex:10}}>
