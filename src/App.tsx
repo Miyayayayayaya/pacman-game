@@ -1,23 +1,18 @@
 import { useEffect, useState } from 'react';
 import styles from './App.module.css';
+import WallCoords from './utils/SetWall';
+import ItemCoords from './utils/SetItem';
 // import { GameState } from './state/gameState';
 
 const makeGameBoard=(width:number,height:number):number[][]=>{
   const twoDimensionalArray:number[][]=Array.from({length:height},()=>Array.from({length:width},()=>0),);
-  for (let kx=0; kx<width;kx++){
-    twoDimensionalArray[0][kx]=1;
-    twoDimensionalArray[height-1][kx]=1;
-  }
-  for(let ky=0;ky<height;ky++){
-    twoDimensionalArray[ky][0]=1;
-    twoDimensionalArray[ky][width-1]=1;
-  }
-  twoDimensionalArray[10][10]=2
+  WallCoords({twoDimensionalArray})
+  ItemCoords({twoDimensionalArray})
   return twoDimensionalArray;
 }
 const setGameSize={
-  x:30,
-  y:30,
+  x:15,
+  y:15,
 }
 type Direction='UP'|'DOWN'|'RIGHT'|'LEFT'|'STOP';
 function App() {
@@ -25,12 +20,6 @@ function App() {
   // [0]:通路 [1]:壁 [2]:アイテム
   const [pos,setPos]=useState({x:1,y:1});
   const [dir,setDir]=useState<Direction>('STOP')
-  // const [gameState, setGameState]=useState<GameState>({isGaming:true})
-  // if(gameState.isGaming){
-  //   const makeWall=structuredClone(gameBoard)
-  //   makeWall[5][5]=1;
-  //   setGameBoard(makeWall);
-  // }
   useEffect(()=>{
     const handleKeyDown=(e:KeyboardEvent)=>{
       switch(e.key){
@@ -104,7 +93,7 @@ function App() {
         }
         return prev;
       });
-    },70)
+    },100)
     return ()=> clearInterval(moveInterval)
   },[dir,gameBoard])
   return (
