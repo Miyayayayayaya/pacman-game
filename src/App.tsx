@@ -3,7 +3,7 @@ import styles from './App.module.css';
 import WallCoords from './utils/SetWall';
 import ItemCoords from './utils/SetItem';
 import CountItem from './utils/CountItem';
-// import { GameState } from './state/gameState';
+import type { GameState } from './state/gameState';
 
 const makeGameBoard=(width:number,height:number):number[][]=>{
   const twoDimensionalArray:number[][]=Array.from({length:height},()=>Array.from({length:width},()=>0),);
@@ -21,8 +21,15 @@ function App() {
   // [0]:通路 [1]:壁 [2]:アイテム
   const [pos,setPos]=useState({x:1,y:1});
   const [dir,setDir]=useState<Direction>('STOP')
+  const [enemyPos,setEnemyPos]=useState({x:7,y:7})
+  const [gameState,setGameState]=useState<GameState>({
+    isGaming:false,
+  })
   useEffect(()=>{
     const handleKeyDown=(e:KeyboardEvent)=>{
+      if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
+        setGameState(prev=>({...prev,isGaming:true}))
+      }
       switch(e.key){
         case 'ArrowUp': setDir('UP'); break;
         case 'ArrowDown': setDir('DOWN'); break;
@@ -34,7 +41,7 @@ function App() {
     return()=>window.removeEventListener('keydown',handleKeyDown);
   },[])
   useEffect(()=>{
-    if (dir==='STOP') return;
+    if (dir==='STOP'||!gameState.isGaming) return;
     const moveInterval=setInterval(()=>{
       setPos((prev)=>{
         switch(dir){
@@ -96,10 +103,33 @@ function App() {
       });
     },100)
     return ()=> clearInterval(moveInterval)
-  },[dir,gameBoard])
+  },[dir,gameBoard,gameState])
+
+  useEffect(()=>{
+    if(!gameState.isGaming) return;
+    const enemyMoveInterval=setInterval(()=>{
+      setEnemyPos((prev)=>{
+        const directions=[
+          {x:0,y:1},
+          {x:0,y:-1},
+          {x:1,y:0},
+          {x:-1,y:0},
+        ];
+        const randomDir=directions[Math.floor(Math.random()*directions.length)]
+        const nextX=prev.x+randomDir.x;
+        const nextY=prev.y+randomDir.y;
+        if(nextX>=0&&nextX<gameBoard[0].length&&gameBoard[nextY][nextX]!==1){
+          return {x:nextX,y:nextY}
+        }
+        return prev;
+      });
+    },300);
+    return ()=>clearInterval(enemyMoveInterval);
+  },[gameState.isGaming,gameBoard])
+
   return (
     <div className={styles.container}>
-      <div className={styles.scoreBoard}>{CountItem({twoDimensionalArray:gameBoard})}</div>
+      <div className={styles.scoreBoard}>残りのアイテム{CountItem({twoDimensionalArray:gameBoard})}</div>
       <div className={styles.board} style={{
         width:setGameSize.x*10,
         height:setGameSize.y*10,
@@ -114,6 +144,7 @@ function App() {
         style={{left:(pos.x)*10,top:(pos.y)*10,zIndex:10}}>
           👤
         </div>
+        <div className={styles.character} style={{left:enemyPos.x*10,top:enemyPos.y*10,color:'red',zIndex:11}}>👾</div>
       </div>
     </div>
   )
