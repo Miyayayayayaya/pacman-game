@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import styles from './App.module.css';
 import WallCoords from './utils/SetWall';
 import ItemCoords from './utils/SetItem';
+import CountItem from './utils/CountItem';
 // import { GameState } from './state/gameState';
 
 const makeGameBoard=(width:number,height:number):number[][]=>{
@@ -98,6 +99,7 @@ function App() {
   },[dir,gameBoard])
   return (
     <div className={styles.container}>
+      <div className={styles.scoreBoard}>{CountItem({twoDimensionalArray:gameBoard})}</div>
       <div className={styles.board} style={{
         width:setGameSize.x*10,
         height:setGameSize.y*10,
