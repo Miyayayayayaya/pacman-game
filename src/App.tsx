@@ -4,6 +4,7 @@ import WallCoords from './utils/SetWall';
 import ItemCoords from './utils/SetItem';
 import CountItem from './utils/CountItem';
 import type { GameState } from './state/gameState';
+import useEnemyMovement from './hooks/useEnemyMovement';
 
 const makeGameBoard=(width:number,height:number):number[][]=>{
   const twoDimensionalArray:number[][]=Array.from({length:height},()=>Array.from({length:width},()=>0),);
@@ -21,7 +22,7 @@ function App() {
   // [0]:通路 [1]:壁 [2]:アイテム
   const [pos,setPos]=useState({x:1,y:1});
   const [dir,setDir]=useState<Direction>('STOP')
-  const [enemyPos,setEnemyPos]=useState({x:7,y:7})
+  const [enemyPos,setEnemyPos]=useState({x:7,y:7,lastDir:{x:0,y:0}})
   const [gameState,setGameState]=useState<GameState>({
     isGaming:false,
   })
@@ -104,29 +105,7 @@ function App() {
     },100)
     return ()=> clearInterval(moveInterval)
   },[dir,gameBoard,gameState])
-
-  useEffect(()=>{
-    if(!gameState.isGaming) return;
-    const enemyMoveInterval=setInterval(()=>{
-      setEnemyPos((prev)=>{
-        const directions=[
-          {x:0,y:1},
-          {x:0,y:-1},
-          {x:1,y:0},
-          {x:-1,y:0},
-        ];
-        const randomDir=directions[Math.floor(Math.random()*directions.length)]
-        const nextX=prev.x+randomDir.x;
-        const nextY=prev.y+randomDir.y;
-        if(nextX>=0&&nextX<gameBoard[0].length&&gameBoard[nextY][nextX]!==1){
-          return {x:nextX,y:nextY}
-        }
-        return prev;
-      });
-    },300);
-    return ()=>clearInterval(enemyMoveInterval);
-  },[gameState.isGaming,gameBoard])
-
+  useEnemyMovement({gameState,setGameSize,gameBoard,setEnemyPos})
   return (
     <div className={styles.container}>
       <div className={styles.scoreBoard}>残りのアイテム{CountItem({twoDimensionalArray:gameBoard})}</div>
