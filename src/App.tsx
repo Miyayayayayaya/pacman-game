@@ -27,13 +27,26 @@ function App() {
     isGaming:false,
     status:'READY',
   })
+  const [time,setTime]=useState(0);
   const resetGame=()=>{
     setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y));
     setPos({x:1,y:1});
     setEnemyPos({x:7,y:7,lastDir:{x:0,y:0}});
     setDir('STOP');
+    setTime(0);
     setGameState({isGaming:false,status:'READY'});
   }
+  useEffect(()=>{
+    let timerId: ReturnType<typeof setInterval>;
+    if(gameState.isGaming){
+      timerId=setInterval(()=>{
+        setTime((prev)=>prev+1);
+      },100);
+    }
+    return ()=>{
+      if(timerId) clearInterval(timerId);
+    }
+  },[gameState.isGaming]);
   useEffect(()=>{
     const remainingItems=gameBoard.flat().filter(cell=>cell===2).length;
     if(gameState.isGaming&&remainingItems===0){
@@ -132,7 +145,13 @@ function App() {
   useEnemyMovement({gameState,setGameSize,gameBoard,setEnemyPos})
   return (
     <div className={styles.container}>
-      <div className={styles.scoreBoard}>残りのアイテム{CountItem({twoDimensionalArray:gameBoard})}</div>
+      <div className={styles.headerContainer}>
+        
+        <div className={styles.timerDisplay}>
+          TIME: {(time/10).toFixed(1)}s
+        </div>
+        <div className={styles.scoreBoard}>ITEMS: <CountItem twoDimensionalArray={gameBoard}/></div>
+      </div>
       <div className={styles.board} style={{
         width:setGameSize.x*10,
         height:setGameSize.y*10,

@@ -48,12 +48,6 @@
   box-shadow:0 0 2px #ffb8ae;
 }
 
-.scoreBoard{
-  width:150px;
-  height:30px;
-  background-color: #FFFFFF;
-}
-
 .overlay {
   position: absolute;
   top: 0;
@@ -104,4 +98,30 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* App.module.css */
+.headerContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* 左右に振り分ける */
+  align-items: center;
+  width: calc(15 * var(--cell-size)); /* ボードの幅に合わせる */
+  font-family: 'DotGothic16', 'Courier New', Courier, monospace;
+  color: #ffffff;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+}
+
+.timerDisplay {
+  order:-1;
+  font-size: 1rem;
+  text-shadow: 2px 2px 0px #000;
+  color: #ffeb3b; /* 目立つ黄色 */
+}
+
+.scoreBoard{
+  font-size: 1rem;
+  text-shadow: 2px 2px 0px #000;
+  background-color: #FFFFFF;
 }
