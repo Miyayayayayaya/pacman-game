@@ -149,15 +149,17 @@ function App() {
         </div>
         <div className={styles.character} style={{left:enemyPos.x*10,top:enemyPos.y*10,color:'red',zIndex:11}}>👾</div>
         {(gameState.status === 'CLEAR' || gameState.status === 'GAMEOVER') && (
-        <div className={styles.overlay}>
-        <div className={styles.resultTitle}>
-        {gameState.status === 'CLEAR' ? '🎉 STAGE CLEAR!' : '💀 GAME OVER'}
-        </div>
-        <button className={styles.retryButton} onClick={resetGame}>
-          RETRY
-        </button>
-    </div>
-  )}
+          <div className={styles.overlay}>
+            <div className={`${styles.resultTitle} ${
+              gameState.status === 'CLEAR' ? styles.clearColor : styles.gameOverColor
+            }`}>
+              {gameState.status === 'CLEAR' ? 'STAGE CLEAR!' : 'GAME OVER'}
+            </div>
+            <button className={styles.retryButton} onClick={resetGame}>
+              {gameState.status === 'CLEAR' ? 'NEXT STAGE' : 'TRY AGAIN'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
