@@ -42,7 +42,7 @@ export default function useEnemyMovement({
             }
             return prev;
         });
-    },50);
+    },200);
     return ()=>clearInterval(enemyMoveInterval);
     },[gameState.isGaming,gameBoard,setEnemyPos,setGameSize])
 }

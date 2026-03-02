@@ -25,11 +25,35 @@ function App() {
   const [enemyPos,setEnemyPos]=useState({x:7,y:7,lastDir:{x:0,y:0}})
   const [gameState,setGameState]=useState<GameState>({
     isGaming:false,
+    status:'READY',
   })
+  const resetGame=()=>{
+    setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y));
+    setPos({x:1,y:1});
+    setEnemyPos({x:7,y:7,lastDir:{x:0,y:0}});
+    setDir('STOP');
+    setGameState({isGaming:false,status:'READY'});
+  }
+  useEffect(()=>{
+    const remainingItems=gameBoard.flat().filter(cell=>cell===2).length;
+    if(gameState.isGaming&&remainingItems===0){
+      setGameState({isGaming:false,status:'CLEAR'});
+    }
+  },[gameBoard,gameState.isGaming]);
+  useEffect(()=>{
+    if(pos.x===enemyPos.x&&pos.y===enemyPos.y&&gameState.isGaming){
+      setGameState({isGaming:false,status:'GAMEOVER'});
+    }
+  },[pos,enemyPos,gameState.isGaming]);
   useEffect(()=>{
     const handleKeyDown=(e:KeyboardEvent)=>{
-      if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
-        setGameState(prev=>({...prev,isGaming:true}))
+      const isArrowKey=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)
+      if(isArrowKey){
+        e.preventDefault();
+        setGameState(prev=>{
+          if(prev.isGaming) return prev;
+          return {...prev,isGaming:true}
+        });
       }
       switch(e.key){
         case 'ArrowUp': setDir('UP'); break;
@@ -124,6 +148,16 @@ function App() {
           👤
         </div>
         <div className={styles.character} style={{left:enemyPos.x*10,top:enemyPos.y*10,color:'red',zIndex:11}}>👾</div>
+        {(gameState.status === 'CLEAR' || gameState.status === 'GAMEOVER') && (
+        <div className={styles.overlay}>
+        <div className={styles.resultTitle}>
+        {gameState.status === 'CLEAR' ? '🎉 STAGE CLEAR!' : '💀 GAME OVER'}
+        </div>
+        <button className={styles.retryButton} onClick={resetGame}>
+          RETRY
+        </button>
+    </div>
+  )}
       </div>
     </div>
   )
