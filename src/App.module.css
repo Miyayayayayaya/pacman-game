@@ -110,6 +110,8 @@
   font-family: 'DotGothic16', 'Courier New', Courier, monospace;
   color: #ffffff;
   font-smooth: never;
+  background-color: #a7a7a7;
+  border: 5px solid #363636;
   -webkit-font-smoothing: none;
 }
 
@@ -117,11 +119,14 @@
   order:-1;
   font-size: 1rem;
   text-shadow: 2px 2px 0px #000;
-  color: #ffeb3b; /* 目立つ黄色 */
+  color: #ffeb3b;
+  margin-left: 10px;
+  margin-right: 5px;
 }
 
 .scoreBoard{
   font-size: 1rem;
   text-shadow: 2px 2px 0px #000;
-  background-color: #FFFFFF;
+  margin-left: 5px;
+  margin-right: 10px;
 }

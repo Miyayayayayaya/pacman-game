@@ -146,7 +146,6 @@ function App() {
   return (
     <div className={styles.container}>
       <div className={styles.headerContainer}>
-        
         <div className={styles.timerDisplay}>
           TIME: {(time/10).toFixed(1)}s
         </div>
