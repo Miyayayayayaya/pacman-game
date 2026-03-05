@@ -6,11 +6,11 @@ import CountItem from './utils/CountItem';
 import type { GameState } from './state/gameState';
 import useEnemyMovement from './hooks/useEnemyMovement';
 
-const makeGameBoard=(width:number,height:number):number[][]=>{
-  const twoDimensionalArray:number[][]=Array.from({length:height},()=>Array.from({length:width},()=>0),);
-  WallCoords({twoDimensionalArray})
-  ItemCoords({twoDimensionalArray})
-  return twoDimensionalArray;
+const makeGameBoard=(width:number,height:number, level:number):number[][]=>{
+  const board =Array.from({length:height},()=>Array.from({length:width},()=>0));
+  WallCoords({board, level});
+  ItemCoords({board})
+  return board;
 }
 const setGameSize={
   x:15,
@@ -18,7 +18,8 @@ const setGameSize={
 }
 type Direction='UP'|'DOWN'|'RIGHT'|'LEFT'|'STOP';
 function App() {
-  const [gameBoard, setGameBoard]=useState<number[][]>(makeGameBoard(setGameSize.y,setGameSize.x));
+  const [stageLevel, setStageLevel]=useState(1);
+  const [gameBoard, setGameBoard]=useState<number[][]>(makeGameBoard(setGameSize.y,setGameSize.x,stageLevel));
   // [0]:通路 [1]:壁 [2]:アイテム
   const [pos,setPos]=useState({x:1,y:1});
   const [dir,setDir]=useState<Direction>('STOP')
@@ -29,12 +30,23 @@ function App() {
   })
   const [time,setTime]=useState(0);
   const resetGame=()=>{
-    setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y));
+    const firstLevel=1;
+    setStageLevel(firstLevel)
+    setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,firstLevel));
     setPos({x:1,y:1});
     setEnemyPos({x:7,y:7,lastDir:{x:0,y:0}});
     setDir('STOP');
     setTime(0);
     setGameState({isGaming:false,status:'READY'});
+  }
+  const nextStage =()=>{
+    const nextLevel = stageLevel + 1;
+    setStageLevel(nextLevel)
+    setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,nextLevel));
+    setPos({ x: 1, y: 1 });
+    setEnemyPos({ x: 7, y: 7, lastDir: { x: 0, y: 0 } });
+    setDir('STOP');
+    setGameState({ isGaming: false, status: 'READY' });
   }
   useEffect(()=>{
     let timerId: ReturnType<typeof setInterval>;
@@ -173,7 +185,7 @@ function App() {
             }`}>
               {gameState.status === 'CLEAR' ? 'STAGE CLEAR!' : 'GAME OVER'}
             </div>
-            <button className={styles.retryButton} onClick={resetGame}>
+            <button className={styles.retryButton} onClick={gameState.status ==="CLEAR"? nextStage :resetGame}>
               {gameState.status === 'CLEAR' ? 'NEXT STAGE' : 'TRY AGAIN'}
             </button>
           </div>
