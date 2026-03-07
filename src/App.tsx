@@ -18,7 +18,7 @@ const setGameSize={
 }
 type Direction='UP'|'DOWN'|'RIGHT'|'LEFT'|'STOP';
 function App() {
-  const [stageLevel, setStageLevel]=useState(1);
+  const [stageLevel, setStageLevel]=useState(2);
   const [gameBoard, setGameBoard]=useState<number[][]>(makeGameBoard(setGameSize.y,setGameSize.x,stageLevel));
   // [0]:通路 [1]:壁 [2]:アイテム
   const [pos,setPos]=useState({x:1,y:1});
@@ -175,7 +175,7 @@ function App() {
         )))}
         <div className={styles.character}
         style={{left:(pos.x)*10,top:(pos.y)*10,zIndex:10}}>
-          👤
+        
         </div>
         <div className={styles.character} style={{left:enemyPos.x*10,top:enemyPos.y*10,color:'red',zIndex:11}}>👾</div>
         {(gameState.status === 'CLEAR' || gameState.status === 'GAMEOVER') && (

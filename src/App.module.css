@@ -31,13 +31,21 @@
 .character{
   position:absolute;
   width:10px;
-  height:10px;
+  height: 10px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:8px;
+  background-image: url('/pacman_sp.png');
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  animation: pacman-chomp 0.3s steps(2) infinite;
   pointer-events:none;
-  transition: top 0.1s, left 0.1s;
+}
+@keyframes pacman-chomp {
+  from { background-position: 0 0; }
+  to { background-position: -20 0; }
 }
 
 .dot{
