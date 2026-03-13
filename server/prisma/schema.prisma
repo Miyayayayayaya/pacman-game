@@ -1,0 +1,19 @@
+// server/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  // adapter を使う設定にする（Prisma 7系）
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Ranking {
+  id        Int      @id @default(autoincrement())
+  userName  String
+  score     Float    // 小数点5桁などのタイム
+  stage     Int      // 1, 2, 0(Total)
+  createdAt DateTime @default(now())
+}

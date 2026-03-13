@@ -5,6 +5,8 @@ import ItemCoords from './utils/SetItem';
 import CountItem from './utils/CountItem';
 import type { GameState } from './state/gameState';
 import useEnemyMovement from './hooks/useEnemyMovement';
+import { useNavigate } from 'react-router-dom';
+import { submitScore } from './api/ranking';
 
 const makeGameBoard=(width:number,height:number, level:number):number[][]=>{
   const board =Array.from({length:height},()=>Array.from({length:width},()=>0));
@@ -18,35 +20,58 @@ const setGameSize={
 }
 type Direction='UP'|'DOWN'|'RIGHT'|'LEFT'|'STOP';
 function App() {
-  const [stageLevel, setStageLevel]=useState(2);
-  const [gameBoard, setGameBoard]=useState<number[][]>(makeGameBoard(setGameSize.y,setGameSize.x,stageLevel));
+  const [gameBoard, setGameBoard]=useState<number[][]>(makeGameBoard(setGameSize.y,setGameSize.x,1));
   // [0]:通路 [1]:壁 [2]:アイテム
   const [pos,setPos]=useState({x:1,y:1});
   const [dir,setDir]=useState<Direction>('STOP')
   const [enemyPos,setEnemyPos]=useState({x:7,y:7,lastDir:{x:0,y:0}})
   const [gameState,setGameState]=useState<GameState>({
     isGaming:false,
+    stage:1,
     status:'READY',
   })
   const [time,setTime]=useState(0);
+  const [stage1Time,setStage1Time]=useState<number|null>(null);
   const resetGame=()=>{
-    const firstLevel=1;
-    setStageLevel(firstLevel)
-    setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,firstLevel));
+    setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,gameState.stage));
     setPos({x:1,y:1});
     setEnemyPos({x:7,y:7,lastDir:{x:0,y:0}});
     setDir('STOP');
     setTime(0);
-    setGameState({isGaming:false,status:'READY'});
+    setGameState({isGaming:false,stage:1,status:'READY'});
   }
   const nextStage =()=>{
-    const nextLevel = stageLevel + 1;
-    setStageLevel(nextLevel)
-    setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,nextLevel));
+    const nextStage=gameState.stage+1
+    setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,gameState.stage));
     setPos({ x: 1, y: 1 });
     setEnemyPos({ x: 7, y: 7, lastDir: { x: 0, y: 0 } });
     setDir('STOP');
-    setGameState({ isGaming: false, status: 'READY' });
+    setGameState({ isGaming: false, stage:nextStage,status: 'READY' });
+  }
+  const navigate=useNavigate();
+  const handleClear=async()=>{
+    const finalTimeInSeconds=time/10;
+    const name=prompt("ランキングに登録する名前を入力してください");
+    if(!name)return;
+    if(gameState.stage===1){
+      setStage1Time(finalTimeInSeconds);
+      await submitScore(name,finalTimeInSeconds,1);
+      setTime(0);
+      setGameState({
+        ...gameState,
+        stage:2,
+        status:'READY',
+        isGaming:false,
+      });
+    }else if(gameState.stage===2){
+      await submitScore(name,finalTimeInSeconds,2);
+    }
+    if(stage1Time!==null){
+      const total=stage1Time+finalTimeInSeconds;
+      await submitScore(name,total,0);
+    }
+    alert("スコアを保存しました！ランキングを表示します。");
+    navigate('/ranking')
   }
   useEffect(()=>{
     let timerId: ReturnType<typeof setInterval>;
@@ -62,14 +87,14 @@ function App() {
   useEffect(()=>{
     const remainingItems=gameBoard.flat().filter(cell=>cell===2).length;
     if(gameState.isGaming&&remainingItems===0){
-      setGameState({isGaming:false,status:'CLEAR'});
+      setGameState({...gameState,isGaming:false,status:'CLEAR'});
     }
   },[gameBoard,gameState.isGaming]);
   useEffect(()=>{
     if(pos.x===enemyPos.x&&pos.y===enemyPos.y&&gameState.isGaming){
-      setGameState({isGaming:false,status:'GAMEOVER'});
+      setGameState({...gameState,isGaming:false,status:'GAMEOVER'});
     }
-  },[pos,enemyPos,gameState.isGaming]);
+  },[pos,enemyPos,gameState]);
   useEffect(()=>{
     const handleKeyDown=(e:KeyboardEvent)=>{
       const isArrowKey=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)
@@ -157,6 +182,12 @@ function App() {
   useEnemyMovement({gameState,setGameSize,gameBoard,setEnemyPos})
   return (
     <div className={styles.container}>
+      <button 
+      onClick={()=>navigate('/ranking')}
+      style={{position:'absolute',top:'10px',right:'10px'}}>
+        VIEW RANKING
+      </button>
+      <button onClick={()=>submitScore("TEST_USER",12.34567,1)}>テスト送信(12,34567s)</button>
       <div className={styles.headerContainer}>
         <div className={styles.timerDisplay}>
           TIME: {(time/10).toFixed(1)}s
