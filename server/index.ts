@@ -22,6 +22,7 @@ app.post('/api/ranking', async (req, res) => {
     });
     res.json(record);
   } catch (error) {
+    console.error("Database Save Error",error)
     res.status(500).json({ error: "保存失敗" });
   }
 });
