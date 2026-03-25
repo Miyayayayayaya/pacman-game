@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import styles from './components/App.module.css';
 import WallCoords from './utils/SetWall';
 import ItemCoords from './utils/SetItem';
@@ -31,7 +31,8 @@ function App() {
     stage:1,
     status:'READY',
   })
-  
+  const [userName, setUserName] = useState<string>('');
+  const [isStarted,setIsStarted]=useState(false);
   const [time,setTime]=useState(0);
   const [stage1Time,setStage1Time]=useState<number|null>(null);
   const resetGame=()=>{
@@ -53,30 +54,24 @@ function App() {
     setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,nextStage));
   }
   const navigate=useNavigate();
-  const handleClear=async()=>{
+  const handleClear=useCallback(async()=>{
+    if (gameState.status!=='CLEAR'||!userName) return;
     const finalTimeInSeconds=time/10;
-    const name=prompt("ランキングに登録する名前を入力してください");
-    if(!name)return;
     if(gameState.stage===1){
       setStage1Time(finalTimeInSeconds);
-      await submitScore(name,finalTimeInSeconds,1);
-      setTime(0);
-      setGameState({
-        ...gameState,
-        stage:2,
-        status:'READY',
-        isGaming:false,
-      });
-    }else if(gameState.stage===2){
-      await submitScore(name,finalTimeInSeconds,2);
+      await submitScore(userName,finalTimeInSeconds,1);
+      console.log("Stage 1 score saved automatically")
     }
-    if(stage1Time!==null){
-      const total=stage1Time+finalTimeInSeconds;
-      await submitScore(name,total,0);
+    else if (gameState.stage===2){
+      await submitScore(userName,finalTimeInSeconds,2);
+      console.log("Stage 2 score saved automatically");
+      if (stage1Time!==null){
+        const total = stage1Time+finalTimeInSeconds;
+        await submitScore(userName,total,0);
+        console.log("Total score saved automatically");
+      }
     }
-    alert("スコアを保存しました！ランキングを表示します。");
-    navigate('/ranking')
-  }
+  },[gameState,userName,time,stage1Time]);
   useEffect(()=>{
     let timerId: ReturnType<typeof setInterval>;
     if(gameState.isGaming){
@@ -91,9 +86,10 @@ function App() {
   useEffect(()=>{
     const remainingItems=gameBoard.flat().filter(cell=>cell===2).length;
     if(gameState.isGaming&&remainingItems===0){
-      setGameState({...gameState,isGaming:false,status:'CLEAR'});
+      setGameState(prev=>({...prev,isGaming:false,status:'CLEAR'}));
+      handleClear();
     }
-  },[gameBoard,gameState]);
+  },[gameBoard,gameState.isGaming,handleClear]);
   useEffect(()=>{
     if(pos.x===enemyPos.x&&pos.y===enemyPos.y&&gameState.isGaming){
       setGameState({...gameState,isGaming:false,status:'GAMEOVER'});
@@ -184,6 +180,32 @@ function App() {
     return ()=> clearInterval(moveInterval)
   },[dir,gameBoard,gameState])
   useEnemyMovement({gameState,setGameSize,gameBoard,setEnemyPos})
+  if (!isStarted){
+    return(
+      <div className={styles.loginContainer}>
+        <h1 className={styles.neonTitle}>PAC-MAN</h1>
+        <div className={styles.loginBox}>
+          <p>ENTER YOUR NAME</p>
+          <input 
+          type="text"
+          maxLength={10}
+          placeholder='NAME...'
+          className={styles.nameInput}
+          onKeyDown={(e)=>{
+            if (e.key==='Enter'){
+              const val=(e.target as HTMLInputElement).value.trim();
+              if(val){
+                setUserName(val);
+                setIsStarted(true);
+              }
+            }
+          }}
+          />
+          <p className={styles.hint}>PRESS ENTER TO START</p>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className={styles.container}>
       <button 

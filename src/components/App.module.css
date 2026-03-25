@@ -132,3 +132,46 @@
   margin-left: 5px;
   margin-right: 10px;
 }
+.loginContainer {
+  background-color: #000;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.neonTitle {
+  color: #ffff00;
+  font-size: 3rem;
+  text-shadow: 0 0 10px #ffff00, 0 0 20px #f00;
+  margin-bottom: 40px;
+}
+
+.loginBox {
+  text-align: center;
+  color: #fff;
+}
+
+.nameInput {
+  background: transparent;
+  border: 2px solid #2222ff;
+  color: #fff;
+  font-size: 1.5rem;
+  padding: 10px;
+  text-align: center;
+  outline: none;
+  box-shadow: 0 0 10px #2222ff;
+  margin: 20px 0;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #555;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
