@@ -1,0 +1,68 @@
+/* src/components/RankingBoard.module.css */
+
+.rankingPage {
+  background-color: #000;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+/* スクロールエリアの設定 */
+.scrollWrapper {
+  width: 90%;
+  max-width: 600px;
+  max-height: 450px; /* 10行分くらいの高さに固定 */
+  overflow-y: auto;   /* 縦方向にスクロールを許可 */
+  border: 2px solid #2222ff;
+  border-radius: 8px;
+  background-color: #111;
+  box-shadow: 0 0 15px #2222ff;
+}
+
+/* スクロールバーの見た目をパックマン風にカスタマイズ */
+.scrollWrapper::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollWrapper::-webkit-scrollbar-track {
+  background: #000;
+}
+.scrollWrapper::-webkit-scrollbar-thumb {
+  background: #ffff00; /* 黄色のスクロールバー */
+  border-radius: 4px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  position: sticky; /* ヘッダーを固定 */
+  top: 0;
+  background-color: #2222ff;
+  color: white;
+  padding: 10px;
+  z-index: 1;
+}
+
+.row td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #333;
+}
+
+.rankNum { color: #ff0; font-weight: bold; }
+.userName { color: #fff; }
+.score { color: #00ff00; font-family: 'Courier New', monospace; }
+
+.backButton {
+  margin-top: 30px;
+  padding: 10px 20px;
+  background-color: #f00;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}

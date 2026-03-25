@@ -9,17 +9,14 @@
 
 .board{
   display: grid;
-  grid-template-columns: repeat(20,10px);
-  grid-template-rows:repeat(20,10px);
-  width: 300px;
-  height: 300px;
   position:relative;
+  border: 4px solid #2222ff;
+  box-shadow: 0 0 20px #2222ff;
+  margin: 0 auto;
   background-color: #333;
 }
 
 .cell{
-  width:10px;
-  height:10px;
   background-color: #000000;
   border:0.1px solid #222;
   box-sizing:border-box;
@@ -30,17 +27,15 @@
 
 .character{
   position:absolute;
-  width:10px;
-  height: 10px;
   display:flex;
   align-items:center;
   justify-content:center;
-  background-image: url('/pacman_sp.png');
   background-size: 200% 100%;
   background-position: 0% 0%;
   background-repeat: no-repeat;
   image-rendering: pixelated;
   animation: pacman-chomp 0.3s steps(2) infinite;
+  transition: all 0.1s linear;
   pointer-events:none;
 }
 @keyframes pacman-chomp {
@@ -49,11 +44,10 @@
 }
 
 .dot{
-  width: 3px;
-  height: 3px;
+  width: 6px;
+  height: 6px;
   background-color:#ffb8ae;
   border-radius:50%;
-  box-shadow:0 0 2px #ffb8ae;
 }
 
 .overlay {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import styles from './App.module.css';
+import styles from './components/App.module.css';
 import WallCoords from './utils/SetWall';
 import ItemCoords from './utils/SetItem';
 import CountItem from './utils/CountItem';
@@ -18,6 +18,7 @@ const setGameSize={
   x:15,
   y:15,
 }
+const CELL_SIZE=30;
 type Direction='UP'|'DOWN'|'RIGHT'|'LEFT'|'STOP';
 function App() {
   const [gameBoard, setGameBoard]=useState<number[][]>(makeGameBoard(setGameSize.y,setGameSize.x,1));
@@ -30,9 +31,11 @@ function App() {
     stage:1,
     status:'READY',
   })
+  
   const [time,setTime]=useState(0);
   const [stage1Time,setStage1Time]=useState<number|null>(null);
   const resetGame=()=>{
+    console.log("Click reset")
     setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,gameState.stage));
     setPos({x:1,y:1});
     setEnemyPos({x:7,y:7,lastDir:{x:0,y:0}});
@@ -41,12 +44,13 @@ function App() {
     setGameState({isGaming:false,stage:1,status:'READY'});
   }
   const nextStage =()=>{
+    console.log("Click nextStage")
     const nextStage=gameState.stage+1
-    setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,gameState.stage));
+    setGameState({ isGaming: false, stage:nextStage,status: 'READY' });
+    console.log(nextStage)
     setPos({ x: 1, y: 1 });
     setEnemyPos({ x: 7, y: 7, lastDir: { x: 0, y: 0 } });
-    setDir('STOP');
-    setGameState({ isGaming: false, stage:nextStage,status: 'READY' });
+    setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,nextStage));
   }
   const navigate=useNavigate();
   const handleClear=async()=>{
@@ -89,7 +93,7 @@ function App() {
     if(gameState.isGaming&&remainingItems===0){
       setGameState({...gameState,isGaming:false,status:'CLEAR'});
     }
-  },[gameBoard,gameState.isGaming]);
+  },[gameBoard,gameState]);
   useEffect(()=>{
     if(pos.x===enemyPos.x&&pos.y===enemyPos.y&&gameState.isGaming){
       setGameState({...gameState,isGaming:false,status:'GAMEOVER'});
@@ -187,7 +191,6 @@ function App() {
       style={{position:'absolute',top:'10px',right:'10px'}}>
         VIEW RANKING
       </button>
-      <button onClick={()=>submitScore("TEST_USER",12.34567,1)}>テスト送信(12,34567s)</button>
       <div className={styles.headerContainer}>
         <div className={styles.timerDisplay}>
           TIME: {(time/10).toFixed(1)}s
@@ -195,20 +198,20 @@ function App() {
         <div className={styles.scoreBoard}>ITEMS: <CountItem twoDimensionalArray={gameBoard}/></div>
       </div>
       <div className={styles.board} style={{
-        width:setGameSize.x*10,
-        height:setGameSize.y*10,
-        gridTemplateColumns: `repeat(${setGameSize.x},10px)`,
-        gridTemplateRows:`repeat(${setGameSize.y},10px)`}}>
+        width:setGameSize.x*CELL_SIZE,
+        height:setGameSize.y*CELL_SIZE,
+        gridTemplateColumns: `repeat(${setGameSize.x},${CELL_SIZE}px)`,
+        gridTemplateRows:`repeat(${setGameSize.y},${CELL_SIZE}px)`}}>
         {gameBoard.map((row,y)=>row.map((col,x)=>(
-          <div className={styles.cell} key={`${x}-${y}`} style={{backgroundColor:col===1?'blue':'black'}}>
+          <div className={styles.cell} key={`${x}-${y}`} style={{width: CELL_SIZE,height:CELL_SIZE,backgroundColor:col===1?'blue':'black'}}>
             {col===2&&<div className={styles.dot}/>}
           </div>
         )))}
         <div className={styles.character}
-        style={{left:(pos.x)*10,top:(pos.y)*10,zIndex:10}}>
-        
+        style={{left:(pos.x)*CELL_SIZE,top:(pos.y)*CELL_SIZE,width:CELL_SIZE,height:CELL_SIZE,fontSize:`$${CELL_SIZE*0.8}px`,zIndex:10}}>
+          🟡
         </div>
-        <div className={styles.character} style={{left:enemyPos.x*10,top:enemyPos.y*10,color:'red',zIndex:11}}>👾</div>
+        <div className={styles.character} style={{left:enemyPos.x*CELL_SIZE,top:enemyPos.y*CELL_SIZE, width:CELL_SIZE,height:CELL_SIZE,fontSize:`${CELL_SIZE*0.8}px`,color:'red',zIndex:11}}>👾</div>
         {(gameState.status === 'CLEAR' || gameState.status === 'GAMEOVER') && (
           <div className={styles.overlay}>
             <div className={`${styles.resultTitle} ${
