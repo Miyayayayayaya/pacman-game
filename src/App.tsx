@@ -132,10 +132,13 @@ function App() {
           setGameBoard((prevBoard)=>{
             const newBoard=structuredClone(prevBoard);
             newBoard[nextY][nextX]=0;
-            const remainingItems=gameBoard.flat().filter(cell=>cell===2).length;
+            const remainingItems=newBoard.flat().filter(cell=>cell===2).length;
             if(remainingItems===0){
-              setGameState(g=>({...g,isGaming:false,status:'CLEAR'}));
-              handleClear(time,gameState.stage);
+              setGameState(g=>{
+                if (g.status==='CLEAR') return g;
+                handleClear(time,gameState.stage);
+                return {...g,isGaming:false,status:'CLEAR'}
+              });
             }
             return newBoard;
           });
@@ -144,7 +147,7 @@ function App() {
       });
     },100);
     return ()=> clearInterval(moveInterval)
-  },[dir,gameBoard,gameState,enemyPos,time,handleClear])
+  },[dir,gameBoard,gameState,enemyPos,handleClear])
   useEnemyMovement({gameState,setGameSize,gameBoard,setEnemyPos})
   if (!isStarted){
     return(
