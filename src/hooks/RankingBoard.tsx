@@ -13,8 +13,8 @@ export default function RankingBoard() {
     const [rankings, setRankings] = useState<RankingEntry[]>([]);
     const [viewStage, setViewStage] = useState<number>(1); // 1, 2, 0(Total)
     const navigate=useNavigate()
-
-    const fetchRankings = async (stage: number) => {
+    useEffect(()=>{
+        const fetchRankings = async (stage: number) => {
         try {
             const response = await fetch(`http://localhost:3001/api/ranking/${stage}`);
             const data = await response.json();
@@ -24,9 +24,8 @@ export default function RankingBoard() {
             console.error("Failed to fetch rankings", e);
         }
     };
-    useEffect(() => {
-        fetchRankings(viewStage);
-    }, [viewStage]);
+    fetchRankings(viewStage);
+    },[viewStage])
     return (
         <div className={styles.rankingPage}>
             <h1 className={styles.title}>ONLINE RANKING</h1>

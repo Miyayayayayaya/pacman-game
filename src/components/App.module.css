@@ -1,10 +1,12 @@
 .container {
   display: flex;
+  min-height: 100vh;
+  width:100vh;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
   gap:5px;
+  background-color: #000;
 }
 
 .board{
@@ -135,6 +137,7 @@
 .loginContainer {
   background-color: #000;
   height: 100vh;
+  width: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;

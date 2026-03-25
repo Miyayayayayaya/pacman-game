@@ -86,18 +86,6 @@ function App() {
     }
   },[gameState.isGaming]);
   useEffect(()=>{
-    const remainingItems=gameBoard.flat().filter(cell=>cell===2).length;
-    if(gameState.isGaming&&remainingItems===0){
-      setGameState(prev=>({...prev,isGaming:false,status:'CLEAR'}));
-      handleClear(time,gameState.stage);
-    }
-  },[gameBoard,gameState,time,handleClear]);
-  useEffect(()=>{
-    if(pos.x===enemyPos.x&&pos.y===enemyPos.y&&gameState.isGaming){
-      setGameState({...gameState,isGaming:false,status:'GAMEOVER'});
-    }
-  },[pos,enemyPos,gameState]);
-  useEffect(()=>{
     const handleKeyDown=(e:KeyboardEvent)=>{
       const isArrowKey=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)
       if(isArrowKey){
@@ -121,66 +109,42 @@ function App() {
     if (dir==='STOP'||!gameState.isGaming) return;
     const moveInterval=setInterval(()=>{
       setPos((prev)=>{
+        let nextX=prev.x;
+        let nextY=prev.y;
         switch(dir){
-          case 'UP':{
-            const nextY=prev.y-1;
-            const nextX=prev.x;
-            if(gameBoard[nextY][nextX]===2){
-              setGameBoard((prevBoard)=>{
-                const newBoard=structuredClone(prevBoard);
-                newBoard[nextY][nextX]=0;
-                return newBoard
-              })
-            }
-            if (prev.y > 1 && gameBoard[nextY][prev.x]!==1) return {...prev,y:prev.y-1};
-            break;
-          }
-          case 'DOWN':{
-            const nextY=prev.y+1;
-            const nextX=prev.x
-            if(gameBoard[nextY][nextX]===2){
-              setGameBoard((prevBoard)=>{
-                const newBoard=structuredClone(prevBoard);
-                newBoard[nextY][nextX]=0;
-                return newBoard
-              })
-            }
-            if (prev.y < setGameSize.y-2 && gameBoard[nextY][prev.x]!==1) return {...prev,y:prev.y+1};
-            
-            break;
-          }
-          case 'LEFT':{
-            const nextX=prev.x-1
-            const nextY=prev.y;
-            if(gameBoard[nextY][nextX]===2){
-              setGameBoard((prevBoard)=>{
-                const newBoard=structuredClone(prevBoard);
-                newBoard[nextY][nextX]=0;
-                return newBoard
-              })
-            }
-            if (prev.x > 0 && gameBoard[prev.y][nextX]!==1) return {...prev,x:prev.x-1};
-            break;
-          }
-          case 'RIGHT':{
-            const nextX=prev.x+1;
-            const nextY=prev.y
-            if(gameBoard[nextY][nextX]===2){
-              setGameBoard((prevBoard)=>{
-                const newBoard=structuredClone(prevBoard);
-                newBoard[nextY][nextX]=0;
-                return newBoard
-              })
-            }
-            if (prev.x < setGameSize.x-1 && gameBoard[prev.y][nextX]!==1) return {...prev,x:prev.x+1};
-            break;
-          }
+          case 'UP': nextY=prev.y-1; break;
+          case 'DOWN': nextY=prev.y+1; break;
+          case 'LEFT': nextX=prev.x-1; break;
+          case 'RIGHT': nextX=prev.x+1; break;
         }
-        return prev;
+        if (
+          nextY < 0 || nextY >= setGameSize.y ||
+          nextX < 0 || nextX >= setGameSize.x ||
+          gameBoard[nextY][nextX]===1
+        ){
+          return prev;
+        }
+        if (nextX===enemyPos.x && nextY===enemyPos.y){
+          setGameState(g=>({...g, isGaming:false, status:'GAMEOVER'}));
+          return prev;
+        }
+        if(gameBoard[nextY][nextX]===2){
+          setGameBoard((prevBoard)=>{
+            const newBoard=structuredClone(prevBoard);
+            newBoard[nextY][nextX]=0;
+            const remainingItems=gameBoard.flat().filter(cell=>cell===2).length;
+            if(remainingItems===0){
+              setGameState(g=>({...g,isGaming:false,status:'CLEAR'}));
+              handleClear(time,gameState.stage);
+            }
+            return newBoard;
+          });
+        }
+        return { x: nextX, y: nextY};
       });
-    },100)
+    },100);
     return ()=> clearInterval(moveInterval)
-  },[dir,gameBoard,gameState])
+  },[dir,gameBoard,gameState,enemyPos,time,handleClear])
   useEnemyMovement({gameState,setGameSize,gameBoard,setEnemyPos})
   if (!isStarted){
     return(
@@ -254,7 +218,7 @@ function App() {
           {gameState.status==='GAMEOVER'&&(
             <div className={styles.overlay}>
               <div className={styles.gameOverText}>GAME OVER</div>
-                <button className={styles.retryButton} onClick={()=>window.location.reload()}>RETRY</button>
+                <button className={styles.retryButton} onClick={resetGame}>RETRY</button>
               </div>
           )}
       </div>
