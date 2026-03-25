@@ -19,6 +19,7 @@ const setGameSize={
   y:15,
 }
 const CELL_SIZE=30;
+const MAX_STAGE=2;
 type Direction='UP'|'DOWN'|'RIGHT'|'LEFT'|'STOP';
 function App() {
   const [gameBoard, setGameBoard]=useState<number[][]>(makeGameBoard(setGameSize.y,setGameSize.x,1));
@@ -45,33 +46,34 @@ function App() {
     setGameState({isGaming:false,stage:1,status:'READY'});
   }
   const nextStage =()=>{
-    console.log("Click nextStage")
+    if(gameState.stage>=MAX_STAGE)return;
     const nextStage=gameState.stage+1
-    setGameState({ isGaming: false, stage:nextStage,status: 'READY' });
-    console.log(nextStage)
     setPos({ x: 1, y: 1 });
+    setDir('STOP')
+    setTime(0);
     setEnemyPos({ x: 7, y: 7, lastDir: { x: 0, y: 0 } });
     setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,nextStage));
+    setGameState({ isGaming: false, stage:nextStage,status: 'READY' });
   }
   const navigate=useNavigate();
-  const handleClear=useCallback(async()=>{
-    if (gameState.status!=='CLEAR'||!userName) return;
-    const finalTimeInSeconds=time/10;
-    if(gameState.stage===1){
-      setStage1Time(finalTimeInSeconds);
-      await submitScore(userName,finalTimeInSeconds,1);
-      console.log("Stage 1 score saved automatically")
-    }
-    else if (gameState.stage===2){
-      await submitScore(userName,finalTimeInSeconds,2);
-      console.log("Stage 2 score saved automatically");
-      if (stage1Time!==null){
-        const total = stage1Time+finalTimeInSeconds;
-        await submitScore(userName,total,0);
-        console.log("Total score saved automatically");
+  const handleClear=useCallback(async(currentTime: number,currentStage:number)=>{
+    if (!userName) return;
+    const finalTimeInSeconds=currentTime/10;
+    try{
+      if(currentStage===1){
+        setStage1Time(finalTimeInSeconds);
+        await submitScore(userName,finalTimeInSeconds,1);
+      } else if (currentStage===2){
+        await submitScore(userName,finalTimeInSeconds,2);
+        if (stage1Time!==null){
+          await submitScore(userName,stage1Time+finalTimeInSeconds,0)
+        }
       }
+      console.log("Save successful");
+    } catch (error) {
+      console.log("Save failed:", error);
     }
-  },[gameState,userName,time,stage1Time]);
+  },[userName,stage1Time]);
   useEffect(()=>{
     let timerId: ReturnType<typeof setInterval>;
     if(gameState.isGaming){
@@ -87,9 +89,9 @@ function App() {
     const remainingItems=gameBoard.flat().filter(cell=>cell===2).length;
     if(gameState.isGaming&&remainingItems===0){
       setGameState(prev=>({...prev,isGaming:false,status:'CLEAR'}));
-      handleClear();
+      handleClear(time,gameState.stage);
     }
-  },[gameBoard,gameState.isGaming,handleClear]);
+  },[gameBoard,gameState,time,handleClear]);
   useEffect(()=>{
     if(pos.x===enemyPos.x&&pos.y===enemyPos.y&&gameState.isGaming){
       setGameState({...gameState,isGaming:false,status:'GAMEOVER'});
@@ -208,11 +210,6 @@ function App() {
   }
   return (
     <div className={styles.container}>
-      <button 
-      onClick={()=>navigate('/ranking')}
-      style={{position:'absolute',top:'10px',right:'10px'}}>
-        VIEW RANKING
-      </button>
       <div className={styles.headerContainer}>
         <div className={styles.timerDisplay}>
           TIME: {(time/10).toFixed(1)}s
@@ -234,18 +231,32 @@ function App() {
           🟡
         </div>
         <div className={styles.character} style={{left:enemyPos.x*CELL_SIZE,top:enemyPos.y*CELL_SIZE, width:CELL_SIZE,height:CELL_SIZE,fontSize:`${CELL_SIZE*0.8}px`,color:'red',zIndex:11}}>👾</div>
-        {(gameState.status === 'CLEAR' || gameState.status === 'GAMEOVER') && (
-          <div className={styles.overlay}>
-            <div className={`${styles.resultTitle} ${
-              gameState.status === 'CLEAR' ? styles.clearColor : styles.gameOverColor
-            }`}>
-              {gameState.status === 'CLEAR' ? 'STAGE CLEAR!' : 'GAME OVER'}
+          {gameState.status==='CLEAR'&&(
+            <div className={styles.overlay}>
+              {gameState.stage<MAX_STAGE?(
+                <div className={styles.clearContent}>
+                  <div className={styles.clearText}>STAGE {gameState.stage} CLEAR</div>
+                  <div className={styles.timeText}>TIME: {(time / 10).toFixed(5)}s</div>
+                  <button className={styles.nextButton} onClick={nextStage}>NEXT STAGE</button>
+                </div>
+              ):(
+                <div className={styles.allClearContainer}>
+                  <div className={styles.finalScore}>
+                    <p>STAGE {MAX_STAGE} TIME: {(time/10).toFixed(5)}s</p>
+                  </div>
+                  <div className={styles.autoSaveNote}>SCORES AUTO-SAVED</div>
+                  <button className={styles.rankingButton} onClick={()=>navigate('/ranking')}>VIEW RANKING</button>
+                </div>
+              )
+              }
             </div>
-            <button className={styles.retryButton} onClick={gameState.status ==="CLEAR"? nextStage :resetGame}>
-              {gameState.status === 'CLEAR' ? 'NEXT STAGE' : 'TRY AGAIN'}
-            </button>
-          </div>
-        )}
+          )}
+          {gameState.status==='GAMEOVER'&&(
+            <div className={styles.overlay}>
+              <div className={styles.gameOverText}>GAME OVER</div>
+                <button className={styles.retryButton} onClick={()=>window.location.reload()}>RETRY</button>
+              </div>
+          )}
       </div>
     </div>
   )
