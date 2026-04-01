@@ -110,6 +110,7 @@ function App() {
   useEffect(()=>{
     const handleKeyDown=(e:KeyboardEvent)=>{
       const isArrowKey=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)
+      if (gameState.status==='GAMEOVER') return;
       if(isArrowKey){
         e.preventDefault();
         setGameState(prev=>{
@@ -126,7 +127,7 @@ function App() {
     };
     window.addEventListener('keydown',handleKeyDown);
     return()=>window.removeEventListener('keydown',handleKeyDown);
-  },[])
+  },[gameState.status])
   useEffect(()=>{
     if (dir==='STOP'||!gameState.isGaming) return;
     const moveInterval=setInterval(()=>{
@@ -150,7 +151,6 @@ function App() {
         }
         if (nextX===currentEnemyPos.x && nextY===currentEnemyPos.y){
           handleGameOver();
-          return prev;
         }
         if(currentBoard[nextY][nextX]===2){
           setGameBoard((prevBoard)=>{

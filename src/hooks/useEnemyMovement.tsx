@@ -46,7 +46,7 @@ export default function useEnemyMovement({
             const availableMoves=directions.filter((dir)=>{
                 const nX=prev.x+dir.x;
                 const nY=prev.y+dir.y;
-                const isPath=nY>=0&&nY<setGameSize.y&&nX>=0&&nX<setGameSize.x&&currentBoard[nY][nX]!==1;
+                const isPath= nY >= 0 && nY < setGameSize.y && nX >= 0 && nX < setGameSize.x && currentBoard[nY][nX] !== 1;
                 const isNotReverse=!(dir.x===-prev.lastDir.x&&dir.y===-prev.lastDir.y);
                 return isPath&&isNotReverse;
             })
@@ -61,7 +61,6 @@ export default function useEnemyMovement({
                 const nextY=prev.y+choice.y;
                 if (nextX===currentPlayerPos.x && nextY===currentPlayerPos.y){
                     onCollision();
-                    return prev;
                 }
                 return {x:nextX,y:nextY,lastDir:choice};
             }
