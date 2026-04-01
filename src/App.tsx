@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import styles from './components/App.module.css';
 import WallCoords from './utils/SetWall';
 import ItemCoords from './utils/SetItem';
@@ -36,6 +36,28 @@ function App() {
   const [isStarted,setIsStarted]=useState(false);
   const [time,setTime]=useState(0);
   const [stage1Time,setStage1Time]=useState<number|null>(null);
+  const gameBoardRef = useRef(gameBoard);
+  const enemyPosRef = useRef(enemyPos);
+  const timeRef = useRef(time);
+  const stageRef = useRef(gameState.stage);
+  const handleGameOver=useCallback(()=>{
+    setGameState(g=>{
+      if (g.status==='GAMEOVER') return g;
+      return {...g,isGaming:false,status:'GAMEOVER'};
+    });
+  },[]);
+  useEffect(()=>{
+    gameBoardRef.current = gameBoard;
+  },[gameBoard]);
+  useEffect(()=>{
+    enemyPosRef.current = enemyPos;
+  },[enemyPos]);
+  useEffect(()=>{
+    timeRef.current = time;
+  },[time]);
+  useEffect(()=>{
+    stageRef.current = gameState.stage;
+  },[gameState.stage]);
   const resetGame=()=>{
     console.log("Click reset")
     setGameBoard(makeGameBoard(setGameSize.x,setGameSize.y,gameState.stage));
@@ -117,26 +139,28 @@ function App() {
           case 'LEFT': nextX=prev.x-1; break;
           case 'RIGHT': nextX=prev.x+1; break;
         }
+        const currentBoard = gameBoardRef.current;
+        const currentEnemyPos = enemyPosRef.current;
         if (
           nextY < 0 || nextY >= setGameSize.y ||
           nextX < 0 || nextX >= setGameSize.x ||
-          gameBoard[nextY][nextX]===1
+          currentBoard[nextY][nextX]===1
         ){
           return prev;
         }
-        if (nextX===enemyPos.x && nextY===enemyPos.y){
-          setGameState(g=>({...g, isGaming:false, status:'GAMEOVER'}));
+        if (nextX===currentEnemyPos.x && nextY===currentEnemyPos.y){
+          handleGameOver();
           return prev;
         }
-        if(gameBoard[nextY][nextX]===2){
+        if(currentBoard[nextY][nextX]===2){
           setGameBoard((prevBoard)=>{
-            const newBoard=structuredClone(prevBoard);
+            const newBoard=prevBoard.map((row)=>[...row]);
             newBoard[nextY][nextX]=0;
             const remainingItems=newBoard.flat().filter(cell=>cell===2).length;
             if(remainingItems===0){
               setGameState(g=>{
                 if (g.status==='CLEAR') return g;
-                handleClear(time,gameState.stage);
+                handleClear(timeRef.current,stageRef.current);
                 return {...g,isGaming:false,status:'CLEAR'}
               });
             }
@@ -147,8 +171,8 @@ function App() {
       });
     },100);
     return ()=> clearInterval(moveInterval)
-  },[dir,gameBoard,gameState,enemyPos,handleClear])
-  useEnemyMovement({gameState,setGameSize,gameBoard,setEnemyPos})
+  },[dir,gameState.isGaming,handleClear,handleGameOver])
+  useEnemyMovement({gameState,setGameSize,gameBoard,setEnemyPos,playerPos:pos,onCollision:handleGameOver})
   if (!isStarted){
     return(
       <div className={styles.loginContainer}>
