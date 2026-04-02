@@ -176,9 +176,10 @@ function App() {
   if (!isStarted){
     return(
       <div className={styles.loginContainer}>
-        <h1 className={styles.neonTitle}>PAC-MAN</h1>
+        <div className={styles.loginGlow}/>
         <div className={styles.loginBox}>
-          <p>ENTER YOUR NAME</p>
+          <h1 className={styles.loginTitle}>PAC-MAN</h1>
+          <p className={styles.loginLabel}>PLAYER NAME</p>
           <input 
           type="text"
           maxLength={10}
@@ -194,7 +195,7 @@ function App() {
             }
           }}
           />
-          <p className={styles.hint}>PRESS ENTER TO START</p>
+          <p className={styles.hint}>Press Enter to Start</p>
         </div>
       </div>
     )
@@ -202,10 +203,14 @@ function App() {
   return (
     <div className={styles.container}>
       <div className={styles.headerContainer}>
-        <div className={styles.timerDisplay}>
-          TIME: {(time/10).toFixed(1)}s
+        <div className={styles.hudBadge}>
+          <span className={styles.hudLabel}>TIME</span>
+          <span className={styles.hudValue}>{(time/10).toFixed(1)}s</span>
         </div>
-        <div className={styles.scoreBoard}>ITEMS: <CountItem twoDimensionalArray={gameBoard}/></div>
+        <div className={styles.hudBadge}>
+          <span className={styles.hudLabel}>ITEMS</span>
+          <span className={styles.hudValue}><CountItem twoDimensionalArray={gameBoard}/></span>
+        </div>
       </div>
       <div className={styles.board} style={{
         width:setGameSize.x*CELL_SIZE,
