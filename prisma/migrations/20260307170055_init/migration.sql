@@ -1,8 +1,0 @@
--- CreateTable
-CREATE TABLE "Ranking" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "userName" TEXT NOT NULL,
-    "score" REAL NOT NULL,
-    "stage" INTEGER NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
