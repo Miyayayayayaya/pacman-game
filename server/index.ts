@@ -1,16 +1,22 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 const app = express();
 app.use(cors()); // Viteからのアクセスを許可
 app.use(express.json());
 
-// Prismaのセットアップ（先ほど作ったロジックをここに移植）
-const adapter = new PrismaBetterSqlite3({
-  url: "file:./dev.db",
-});
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL is not set");
+}
+
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 // スコア送信 API

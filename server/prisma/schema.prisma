@@ -1,13 +1,12 @@
 // server/prisma/schema.prisma
 
 generator client {
-  provider = "prisma-client-js"
-  // adapter を使う設定にする（Prisma 7系）
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client"
+  output   = "//
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Ranking {
