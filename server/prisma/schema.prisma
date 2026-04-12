@@ -1,7 +1,7 @@
 // server/prisma/schema.prisma
 
 generator client {
-  provider = "prisma-clien-js"
+  provider = "prisma-client-js"
   output   = "../../node_modules/.generated/client"
 }
 
