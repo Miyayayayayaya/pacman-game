@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "postinstall": "prisma generate --schema=./server/prisma/schema.prisma",
-    "build": "...",
+    "postinstall": "npx prisma generate --schema=./server/prisma/schema.prisma",
+    "build": "tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "type-check": "tsc --noEmit"
