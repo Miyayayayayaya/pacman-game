@@ -44,4 +44,8 @@ app.get('/api/ranking/:stage', async (req, res) => {
   res.json(data);
 });
 
-app.listen(3001, () => console.log('Server running on http://localhost:3001'));
+const PORT=process.env.PORT || 3001;
+
+app.listen(PORT, '0.0.0.0', ()=>{
+  console.log(`Server is running on port ${PORT}`);
+});
